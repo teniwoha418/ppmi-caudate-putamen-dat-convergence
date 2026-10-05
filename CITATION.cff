@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it as below."
+title: "Analysis code for: Faster convergence of caudate and putamen dopamine transporter binding in treated GBA and LRRK2 Parkinson's disease: a PPMI study"
+authors:
+  - family-names: Shiiba
+    given-names: Takuro
+    affiliation: "Department of Medical Image Analysis, Faculty of Life Sciences, Kumamoto University"
+version: 1.0.0
+license: MIT
