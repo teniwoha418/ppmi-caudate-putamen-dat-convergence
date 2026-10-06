@@ -4,3 +4,6 @@ scipy==1.17.1
 statsmodels==0.15.0
 lifelines==0.30.3
 openpyxl==3.1.5
+matplotlib==3.11.2
+pillow==12.3.0
+python-docx==1.2.0  # optional: Table 2 cross-check in make_figures.py

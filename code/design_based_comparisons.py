@@ -21,7 +21,9 @@ def three_group(X):
     X = set_groups(X, GROUPS3)
     full, null = fit_lmm(FG, X), fit_lmm(FG0, X)
     tk = tukey_contrasts(fit_lmm(FG, X, reml=True), GROUPS3)
-    return dict(n=X.PATNO.nunique(), p=lrt(full, null, 2)[1], gba=tk.loc[0, "diff"], lrrk2=tk.loc[1, "diff"])
+    return dict(n=X.PATNO.nunique(), p=lrt(full, null, 2)[1], gba=tk.loc[0, "diff"], lrrk2=tk.loc[1, "diff"],
+                gba_lo=tk.loc[0, "lo"], gba_hi=tk.loc[0, "hi"], gba_p_tukey=tk.loc[0, "p_tukey"],
+                lrrk2_lo=tk.loc[1, "lo"], lrrk2_hi=tk.loc[1, "hi"], lrrk2_p_tukey=tk.loc[1, "p_tukey"])
 
 # genetic confirmation
 g = gc.reindex(X3.PATNO.unique())
@@ -53,7 +55,9 @@ def within_gen(ids, extra=""):
     for c, s in [("agec", "age0"), ("durc", "dur"), ("P0c", "P0"), ("L0c", "L0"), ("u0c", "u0")]:
         d[c] = d[s] - b[s].mean()
     m1 = fit_lmm("G ~ t*C(sg) + t*trt0 + " + COV + extra, d); m0 = fit_lmm("G ~ t*C(sg) + trt0 + " + COV + extra, d)
-    return dict(n=d.PATNO.nunique(), est=m1.params["t:trt0"], p=lrt(m1, m0, 1)[1])
+    e, se = -m1.params["t:trt0"], m1.bse["t:trt0"]  # e > 0: faster decline in treated genetic PD
+    return dict(n=d.PATNO.nunique(), est=m1.params["t:trt0"], excess_decline=e, lo=e - 1.96 * se, hi=e + 1.96 * se,
+                p=lrt(m1, m0, 1)[1])
 
 OUT["matched_pairs"] = len(pairs)
 OUT["within_genetic_all"] = within_gen(set(bg.index))
@@ -90,8 +94,10 @@ def state_cmp(state, gen_ids, sp_filter=None, extra="", need_u=False):
                     best[key] = r
             except Exception:
                 pass
+    m = best["full"]; e, se = -m.params["tdxc:gen"], m.bse["tdxc:gen"]  # e > 0: faster decline in genetic PD
     return dict(n_sp=int((b.gen == 0).sum()), n_gen=int((b.gen == 1).sum()),
-                diff=best["full"].params["tdxc:gen"], p=lrt(best["full"], best["null"], 1)[1])
+                diff=m.params["tdxc:gen"], excess_decline=e, lo=e - 1.96 * se, hi=e + 1.96 * se,
+                p=lrt(best["full"], best["null"], 1)[1])
 
 gt, gu = set(bg.index[bg.trt0 == 1]), set(bg.index[bg.trt0 == 0])
 OUT["on_treatment"] = state_cmp(1, gt)

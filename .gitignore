@@ -5,6 +5,10 @@
 *.pkl
 # analysis outputs derived from PPMI data
 *_results.json
+figure_values.json
+Figure*.pdf
+Figure*.tif
+Figure*_preview.png
 # Python / OS
 __pycache__/
 *.pyc
